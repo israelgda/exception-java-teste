@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import model.exceptions.DomainException;
+
 public class Reserva {
 	 private Integer numQuarto;
 	 private Date checkIn;
@@ -14,7 +16,15 @@ public class Reserva {
 	 public Reserva() {
 		 
 	 }
-	 public Reserva(Integer numQuarto, Date checkIn, Date checkOut) {
+	 public Reserva(Integer numQuarto, Date checkIn, Date checkOut) throws DomainException{
+		Date now = new Date();
+		
+		if(!checkOut.after(checkIn)) {
+			throw new DomainException("Erro em reservar: a data de checkout é anterior a de checkin");
+		}
+		if((checkIn.before(now)) || (checkOut.before(now))) {
+			throw new DomainException("As datas da reserva precição ser futuras");
+		}
 		this.numQuarto = numQuarto;
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
@@ -37,20 +47,15 @@ public class Reserva {
 		return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
 	}
 	
-	public String updateDias(Date checkIn, Date checkOut) {
+	public void updateDias(Date checkIn, Date checkOut) throws DomainException {
 		Date now = new Date();
 		
 		if((checkIn.before(now)) || (checkOut.before(now))) {
-			return "Datas de atualização devem ser em datas futuras";
-		}
-		if(!checkOut.after(checkIn)) {
-			return "Erro em reservar: a data de checkout é anterior a de checkin";
+			throw new DomainException("As datas da reserva precição ser futuras");
 		}	
 		
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
-		
-		return null;
 	}
 	
 	@Override
@@ -58,6 +63,6 @@ public class Reserva {
 		return "Quarto: " + numQuarto + 
 				", check in: " + sdf.format(checkIn) +
 				", check out: " + sdf.format(checkOut) +
-				", duração: " + duracaoDias() + " noite.s";
+				", duração: " + duracaoDias() + " noites";
 	}
 }
